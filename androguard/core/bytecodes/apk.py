@@ -382,6 +382,9 @@ class APK(object):
         """
         l = []
         for i in self.xml:
+            if self.xml[i] is None:
+                continue
+
             for item in self.xml[i].getElementsByTagName(tag_name):
                 value = item.getAttributeNS(NS_ANDROID_URI, attribute)
                 value = self.format_value( value )

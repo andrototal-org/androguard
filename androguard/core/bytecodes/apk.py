@@ -160,6 +160,7 @@ class APK(object):
         self.androidversion = {}
         self.permissions = []
         self.valid_apk = False
+        self.malformed_axml = True
 
         self.files = {}
         self.files_crc32 = {}
@@ -185,6 +186,8 @@ class APK(object):
         for i in self.zip.namelist():
             if i == "AndroidManifest.xml":
                 self.axml[i] = AXMLPrinter(self.zip.read(i))
+                self.valid_apk = self.axml[i].axml.is_valid()
+                
                 try:
                     self.xml[i] = minidom.parseString(self.axml[i].get_buff())
                 except:
@@ -198,7 +201,7 @@ class APK(object):
                     for item in self.xml[i].getElementsByTagName('uses-permission'):
                         self.permissions.append(str(item.getAttributeNS(NS_ANDROID_URI, "name")))
 
-                    self.valid_apk = True
+                    self.malformed_axml = False
 
         self.get_files_types()
 
@@ -217,6 +220,15 @@ class APK(object):
             :rtype: boolean
         """
         return self.valid_apk
+
+    def is_malformed_AXML(self):
+        """
+            Return true if the AndroidManifest XML is malformed,
+            this is the case with some malware (oBad)
+
+            :rtype: boolean
+        """
+        return self.malformed_axml
 
     def get_filename(self):
         """
